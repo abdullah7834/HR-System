@@ -57,7 +57,7 @@ export default function RolesPage() {
         <StatCard title="Permissions" value={45} icon={Shield} iconColor="text-green-600" iconBgColor="bg-green-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
         <DataTable data={roles} columns={columns} searchPlaceholder="Search roles..." />
       </div>
     </div>

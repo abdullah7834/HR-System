@@ -118,7 +118,7 @@ export default function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <div className="bg-white rounded-lg border border-slate-100 p-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-slate-500">Total responses</span>
             <span className="text-[10px] font-medium text-green-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
@@ -129,7 +129,7 @@ export default function DashboardPage() {
           <p className="text-[10px] text-slate-400 mt-0.5">of candidates for the period</p>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-100 p-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-slate-500">Responses today</span>
             <span className="text-[10px] font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
@@ -140,7 +140,7 @@ export default function DashboardPage() {
           <p className="text-[10px] text-slate-400 mt-0.5">candidates left a response</p>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-100 p-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-slate-500">Total vacancies</span>
             <span className="text-[10px] font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
@@ -151,7 +151,7 @@ export default function DashboardPage() {
           <p className="text-[10px] text-slate-400 mt-0.5">active and closed vacancies</p>
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-100 p-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-slate-500">Closed vacancies</span>
           </div>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
           <Progress value={37} className="h-1.5 mt-2" />
         </div>
 
-        <div className="bg-white rounded-lg border border-slate-100 p-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-slate-500">Recruitment plan</span>
           </div>
@@ -171,7 +171,7 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Bar Chart */}
-        <div className="lg:col-span-2 bg-white rounded-lg border border-slate-100 p-4">
+        <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-slate-900">Candidate statistics</h3>
             <div className="flex items-center gap-4 text-xs">
@@ -203,7 +203,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Pie Chart */}
-        <div className="bg-white rounded-lg border border-slate-100 p-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-4">
           <h3 className="text-sm font-medium text-slate-900 mb-4">Candidate Source</h3>
           <div className="flex items-center gap-4">
             <div className="relative w-32 h-32">
@@ -248,8 +248,8 @@ export default function DashboardPage() {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recruiters Table */}
-        <div className="bg-white rounded-lg border border-slate-100">
-          <div className="px-4 py-3 border-b border-slate-100">
+        <div className="bg-white rounded-lg border border-slate-200">
+          <div className="px-4 py-3 border-b border-slate-200">
             <h3 className="text-sm font-medium text-slate-900">Recruiters rating</h3>
           </div>
           <div className="overflow-x-auto">
@@ -296,8 +296,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Vacancy Closing Time */}
-        <div className="bg-white rounded-lg border border-slate-100">
-          <div className="px-4 py-3 border-b border-slate-100">
+        <div className="bg-white rounded-lg border border-slate-200">
+          <div className="px-4 py-3 border-b border-slate-200">
             <h3 className="text-sm font-medium text-slate-900">Average vacancy closing time</h3>
           </div>
           <div className="p-4">

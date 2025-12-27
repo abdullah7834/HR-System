@@ -60,19 +60,19 @@ export default function LeavesPage() {
         </TabsList>
 
         <TabsContent value="all">
-          <div className="bg-white rounded-lg border border-slate-100">
+          <div className="bg-white rounded-lg border border-slate-200">
             <DataTable data={leaveRequests} columns={columns} searchPlaceholder="Search requests..." />
           </div>
         </TabsContent>
 
         <TabsContent value="pending">
-          <div className="bg-white rounded-lg border border-slate-100">
+          <div className="bg-white rounded-lg border border-slate-200">
             <DataTable data={leaveRequests.filter(l => l.status === 'pending')} columns={columns} searchPlaceholder="Search requests..." />
           </div>
         </TabsContent>
 
         <TabsContent value="approved">
-          <div className="bg-white rounded-lg border border-slate-100">
+          <div className="bg-white rounded-lg border border-slate-200">
             <DataTable data={leaveRequests.filter(l => l.status === 'approved')} columns={columns} searchPlaceholder="Search requests..." />
           </div>
         </TabsContent>

@@ -37,7 +37,7 @@ export default function StagesPage() {
         <StatCard title="Conversion Rate" value="26%" icon={ArrowRight} iconColor="text-green-600" iconBgColor="bg-green-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100 p-4">
+      <div className="bg-white rounded-lg border border-slate-200 p-4">
         <h3 className="text-sm font-medium text-slate-900 mb-4">Pipeline Flow</h3>
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
           {stages.map((stage, idx) => (
@@ -58,8 +58,8 @@ export default function StagesPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100 mt-4">
-        <div className="px-4 py-3 border-b border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200 mt-4">
+        <div className="px-4 py-3 border-b border-slate-200">
           <h3 className="text-sm font-medium text-slate-900">All Stages</h3>
         </div>
         <div className="divide-y divide-slate-50">

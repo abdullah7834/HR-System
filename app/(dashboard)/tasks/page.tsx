@@ -96,7 +96,7 @@ export default function TasksPage() {
           onDragEnd={handleDragEnd}
           renderCard={(task) => (
             <div 
-              className="bg-white rounded-lg border border-slate-100 p-3 cursor-pointer hover:shadow-sm"
+              className="bg-white rounded-lg border border-slate-200 p-3 cursor-pointer hover:shadow-sm"
               onClick={() => router.push(`/tasks/${task.id}`)}
             >
               <p className="text-sm font-medium text-slate-900 mb-1">{task.title}</p>

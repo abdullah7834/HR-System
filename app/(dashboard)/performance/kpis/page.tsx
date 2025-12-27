@@ -62,7 +62,7 @@ export default function KPIsPage() {
         <StatCard title="Categories" value={new Set(kpis.map(k => k.category)).size} icon={Users} iconColor="text-purple-600" iconBgColor="bg-purple-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
         <DataTable data={kpis} columns={columns} searchPlaceholder="Search KPIs..." />
       </div>
     </div>

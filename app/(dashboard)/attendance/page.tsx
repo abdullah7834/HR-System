@@ -64,7 +64,7 @@ export default function AttendancePage() {
         <StatCard title="Avg Hours" value="8.5h" icon={Clock} iconColor="text-blue-600" iconBgColor="bg-blue-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100 p-4 mb-4">
+      <div className="bg-white rounded-lg border border-slate-200 p-4 mb-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-medium text-slate-900">Today's Attendance</h3>
@@ -76,8 +76,8 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
-        <div className="px-4 py-3 border-b border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
+        <div className="px-4 py-3 border-b border-slate-200">
           <h3 className="text-sm font-medium text-slate-900">Attendance History</h3>
         </div>
         <DataTable data={records} columns={columns} searchable={false} />

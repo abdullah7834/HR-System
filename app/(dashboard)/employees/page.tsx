@@ -59,7 +59,7 @@ export default function EmployeesPage() {
         <StatCard title="Inactive" value={employees.filter(e => e.status === 'inactive').length} icon={UserX} iconColor="text-slate-600" iconBgColor="bg-slate-100" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
         <DataTable
           data={employees}
           columns={columns}

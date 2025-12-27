@@ -66,8 +66,8 @@ export default function PayrollPage() {
         <StatCard title="Payslips" value="540" icon={FileText} iconColor="text-amber-600" iconBgColor="bg-amber-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
-        <div className="px-4 py-3 border-b border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
+        <div className="px-4 py-3 border-b border-slate-200">
           <h3 className="text-sm font-medium text-slate-900">Payroll History</h3>
         </div>
         <DataTable data={payrollRuns} columns={columns} searchable={false} />

@@ -34,7 +34,7 @@ export default function DepartmentsPage() {
       header: 'Manager',
       cell: (row) => {
         const manager = getManager(row.managerId);
-        if (!manager) return <span className="text-xs text-gray-400">Not assigned</span>;
+        if (!manager) return <span className="text-xs text-slate-400">Not assigned</span>;
         return (
           <div className="flex items-center gap-2">
             <Avatar className="h-7 w-7">
@@ -53,7 +53,7 @@ export default function DepartmentsPage() {
       header: 'Employees',
       cell: (row) => (
         <div className="flex items-center gap-1 text-sm">
-          <Users className="h-3.5 w-3.5 text-gray-400" />
+          <Users className="h-3.5 w-3.5 text-slate-400" />
           {row.employeeCount}
         </div>
       ),
@@ -106,14 +106,14 @@ export default function DepartmentsPage() {
       {/* Department Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
         {departments.map((dept) => (
-          <div key={dept.id} className="bg-white rounded-xl border border-gray-100 p-4 cursor-pointer hover:shadow-sm hover:border-gray-200 transition-all">
+          <div key={dept.id} className="bg-white rounded-lg border border-slate-200 p-4 cursor-pointer hover:shadow-sm hover:border-slate-300 transition-all">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-blue-50 rounded-lg">
                 <Building2 className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="font-medium text-sm text-gray-900">{dept.name}</p>
-                <p className="text-xs text-gray-500">{dept.employeeCount} employees</p>
+                <p className="font-medium text-sm text-slate-900">{dept.name}</p>
+                <p className="text-xs text-slate-500">{dept.employeeCount} employees</p>
               </div>
             </div>
           </div>
@@ -121,9 +121,9 @@ export default function DepartmentsPage() {
       </div>
 
       {/* Table View */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <h3 className="font-semibold text-sm text-gray-900">All Departments</h3>
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <div className="px-4 py-3 border-b border-slate-200">
+          <h3 className="font-semibold text-sm text-slate-900">All Departments</h3>
         </div>
         <DataTable
           data={departments}

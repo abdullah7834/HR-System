@@ -33,7 +33,7 @@ export default function ApplicantsPage() {
   };
 
   const renderCandidateCard = (candidate: Candidate) => (
-    <div className="bg-white rounded-lg border border-gray-100 p-3 cursor-pointer hover:shadow-sm transition-shadow">
+    <div className="bg-white rounded-lg border border-slate-200 p-3 cursor-pointer hover:shadow-sm transition-shadow">
       <div className="space-y-2.5">
         <div className="flex items-start gap-2.5">
           <Avatar className="h-8 w-8">
@@ -43,19 +43,19 @@ export default function ApplicantsPage() {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-sm text-gray-900 truncate">{candidate.name}</h4>
-            <p className="text-[11px] text-gray-500 truncate">{candidate.position}</p>
+            <h4 className="font-medium text-sm text-slate-900 truncate">{candidate.name}</h4>
+            <p className="text-[11px] text-slate-500 truncate">{candidate.position}</p>
           </div>
         </div>
         <div className="flex items-center gap-0.5">
           {Array.from({ length: 5 }).map((_, i) => (
             <Star
               key={i}
-              className={`h-3 w-3 ${i < candidate.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`}
+              className={`h-3 w-3 ${i < candidate.rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}`}
             />
           ))}
         </div>
-        <div className="flex items-center justify-between text-[10px] text-gray-400 pt-1 border-t border-gray-50">
+        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100">
           <span>{candidate.source}</span>
           <span>{new Date(candidate.appliedAt).toLocaleDateString()}</span>
         </div>
@@ -77,7 +77,7 @@ export default function ApplicantsPage() {
           </Avatar>
           <div>
             <p className="font-medium text-sm">{row.name}</p>
-            <p className="text-xs text-gray-500">{row.email}</p>
+            <p className="text-xs text-slate-500">{row.email}</p>
           </div>
         </div>
       ),
@@ -85,7 +85,7 @@ export default function ApplicantsPage() {
     {
       id: 'position',
       header: 'Position',
-      cell: (row) => <span className="text-sm text-gray-600">{row.position}</span>,
+      cell: (row) => <span className="text-sm text-slate-600">{row.position}</span>,
     },
     {
       id: 'stage',
@@ -100,7 +100,7 @@ export default function ApplicantsPage() {
           {Array.from({ length: 5 }).map((_, i) => (
             <Star
               key={i}
-              className={`h-3.5 w-3.5 ${i < row.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'}`}
+              className={`h-3.5 w-3.5 ${i < row.rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200'}`}
             />
           ))}
         </div>
@@ -109,12 +109,12 @@ export default function ApplicantsPage() {
     {
       id: 'source',
       header: 'Source',
-      cell: (row) => <span className="text-sm text-gray-500">{row.source}</span>,
+      cell: (row) => <span className="text-sm text-slate-500">{row.source}</span>,
     },
     {
       id: 'applied',
       header: 'Applied',
-      cell: (row) => <span className="text-sm text-gray-500">{new Date(row.appliedAt).toLocaleDateString()}</span>,
+      cell: (row) => <span className="text-sm text-slate-500">{new Date(row.appliedAt).toLocaleDateString()}</span>,
     },
     {
       id: 'actions',
@@ -122,10 +122,10 @@ export default function ApplicantsPage() {
       cell: () => (
         <div className="flex items-center gap-1">
           <Button size="icon" variant="ghost" className="h-7 w-7">
-            <Mail className="h-3.5 w-3.5 text-gray-400" />
+            <Mail className="h-3.5 w-3.5 text-slate-400" />
           </Button>
           <Button size="icon" variant="ghost" className="h-7 w-7">
-            <Phone className="h-3.5 w-3.5 text-gray-400" />
+            <Phone className="h-3.5 w-3.5 text-slate-400" />
           </Button>
         </div>
       ),
@@ -144,7 +144,7 @@ export default function ApplicantsPage() {
         ]}
         actions={
           <>
-            <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+            <div className="flex items-center bg-slate-100 rounded-lg p-0.5">
               <Button
                 variant={view === 'board' ? 'secondary' : 'ghost'}
                 size="sm"

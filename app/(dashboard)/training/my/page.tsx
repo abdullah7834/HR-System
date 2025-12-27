@@ -39,7 +39,7 @@ export default function MyTrainingPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {myTrainings.map((training) => (
-          <div key={training.id} className="bg-white rounded-lg border border-slate-100 p-4">
+          <div key={training.id} className="bg-white rounded-lg border border-slate-200 p-4">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <h3 className="font-medium text-slate-900">{training.name}</h3>

@@ -77,7 +77,7 @@ export default function ReviewsPage() {
         <StatCard title="Avg Rating" value="4.5" icon={Star} iconColor="text-purple-600" iconBgColor="bg-purple-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
         <DataTable data={reviews} columns={columns} searchPlaceholder="Search reviews..." />
       </div>
     </div>

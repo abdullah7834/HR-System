@@ -68,7 +68,7 @@ export default function ProgramsPage() {
         <StatCard title="Upcoming" value={programs.filter(p => p.status === 'upcoming').length} icon={Clock} iconColor="text-amber-600" iconBgColor="bg-amber-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
         <DataTable data={programs} columns={columns} searchPlaceholder="Search programs..." />
       </div>
     </div>

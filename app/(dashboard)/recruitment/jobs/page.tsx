@@ -19,7 +19,7 @@ export default function JobOpeningsPage() {
       cell: (row) => (
         <div>
           <p className="font-medium text-sm">{row.title}</p>
-          <p className="text-xs text-gray-500">{row.department}</p>
+          <p className="text-xs text-slate-500">{row.department}</p>
         </div>
       ),
     },
@@ -27,7 +27,7 @@ export default function JobOpeningsPage() {
       id: 'location',
       header: 'Location',
       cell: (row) => (
-        <div className="flex items-center gap-1 text-xs text-gray-600">
+        <div className="flex items-center gap-1 text-xs text-slate-600">
           <MapPin className="h-3 w-3" />
           {row.location}
         </div>
@@ -47,7 +47,7 @@ export default function JobOpeningsPage() {
       header: 'Applicants',
       cell: (row) => (
         <div className="flex items-center gap-1 text-xs">
-          <Users className="h-3 w-3 text-gray-400" />
+          <Users className="h-3 w-3 text-slate-400" />
           {row.applicantCount}
         </div>
       ),
@@ -60,7 +60,7 @@ export default function JobOpeningsPage() {
     {
       id: 'posted',
       header: 'Posted',
-      cell: (row) => <span className="text-xs text-gray-500">{new Date(row.postedAt).toLocaleDateString()}</span>,
+      cell: (row) => <span className="text-xs text-slate-500">{new Date(row.postedAt).toLocaleDateString()}</span>,
     },
   ];
 
@@ -116,7 +116,7 @@ export default function JobOpeningsPage() {
         />
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100">
+      <div className="bg-white rounded-lg border border-slate-200">
         <DataTable
           data={jobOpenings}
           columns={columns}

@@ -78,7 +78,7 @@ export default function CompaniesPage() {
         <StatCard title="Locations" value={new Set(companies.map(c => c.location.split(',')[1]?.trim())).size} icon={MapPin} iconColor="text-amber-600" iconBgColor="bg-amber-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
         <DataTable data={companies} columns={columns} searchPlaceholder="Search companies..." />
       </div>
     </div>

@@ -37,7 +37,7 @@ export default function PayslipsPage() {
       header: 'Period',
       cell: (row) => (
         <div className="flex items-center gap-2">
-          <Calendar className="h-3.5 w-3.5 text-gray-400" />
+          <Calendar className="h-3.5 w-3.5 text-slate-400" />
           <span className="font-medium text-sm">{row.month} {row.year}</span>
         </div>
       ),
@@ -80,7 +80,7 @@ export default function PayslipsPage() {
     {
       id: 'paidDate',
       header: 'Paid Date',
-      cell: (row) => <span className="text-xs text-gray-500">{row.paidDate ? new Date(row.paidDate).toLocaleDateString() : '-'}</span>,
+      cell: (row) => <span className="text-xs text-slate-500">{row.paidDate ? new Date(row.paidDate).toLocaleDateString() : '-'}</span>,
     },
     {
       id: 'actions',
@@ -116,10 +116,10 @@ export default function PayslipsPage() {
       />
 
       {/* Latest Payslip Card */}
-      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-6">
+      <div className="bg-white rounded-lg border border-slate-200 p-4 mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <FileText className="h-4 w-4 text-gray-500" />
-          <h3 className="font-semibold text-sm text-gray-900">Latest Payslip - {latestPayslip.month} {latestPayslip.year}</h3>
+          <FileText className="h-4 w-4 text-slate-500" />
+          <h3 className="font-semibold text-sm text-slate-900">Latest Payslip - {latestPayslip.month} {latestPayslip.year}</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
@@ -143,7 +143,7 @@ export default function PayslipsPage() {
             iconColor="text-green-600"
             iconBgColor="bg-green-50"
           />
-          <div className="bg-white rounded-xl p-4 border border-gray-100 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-4 border border-slate-200 flex items-center justify-center">
             <Button size="sm" className="h-8 text-xs" onClick={() => handleDownload(latestPayslip.id)}>
               <Download className="h-3.5 w-3.5 mr-1.5" />
               Download PDF
@@ -153,9 +153,9 @@ export default function PayslipsPage() {
       </div>
 
       {/* Payslip History */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <h3 className="font-semibold text-sm text-gray-900">Payslip History</h3>
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <div className="px-4 py-3 border-b border-slate-200">
+          <h3 className="font-semibold text-sm text-slate-900">Payslip History</h3>
         </div>
         <DataTable
           data={payslips}

@@ -60,7 +60,7 @@ export function DataTable<T extends { id: string }>({
   return (
     <div>
       {searchable && (
-        <div className="p-3 border-b border-slate-100">
+        <div className="p-3 border-b border-slate-200">
           <div className="relative w-64">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
@@ -76,9 +76,9 @@ export function DataTable<T extends { id: string }>({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100">
+            <tr className="border-b border-slate-200 bg-slate-50">
               {selectable && (
-                <th className="w-10 px-3 py-2">
+                <th className="w-10 px-3 py-2.5">
                   <Checkbox
                     checked={selected.length === paginated.length && paginated.length > 0}
                     onCheckedChange={toggleAll}
@@ -88,19 +88,19 @@ export function DataTable<T extends { id: string }>({
               {columns.map((col) => (
                 <th
                   key={col.id}
-                  className="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                  className="px-3 py-2.5 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wide"
                 >
                   {col.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-100">
             {paginated.map((row) => (
               <tr
                 key={row.id}
                 onClick={() => onRowClick?.(row)}
-                className={`border-b border-slate-50 last:border-0 ${onRowClick ? 'cursor-pointer hover:bg-slate-50' : ''}`}
+                className={`${onRowClick ? 'cursor-pointer hover:bg-slate-50' : ''} transition-colors`}
               >
                 {selectable && (
                   <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
@@ -122,7 +122,7 @@ export function DataTable<T extends { id: string }>({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-3 py-2 border-t border-slate-100">
+        <div className="flex items-center justify-between px-3 py-2.5 border-t border-slate-200">
           <p className="text-xs text-slate-500">
             {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, filtered.length)} of {filtered.length}
           </p>

@@ -89,7 +89,7 @@ export default function InterviewsPage() {
         <StatCard title="Video Calls" value={interviews.filter(i => i.type === 'video').length} icon={Video} iconColor="text-amber-600" iconBgColor="bg-amber-50" />
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-100">
+      <div className="bg-white rounded-lg border border-slate-200">
         <DataTable data={interviews} columns={columns} searchPlaceholder="Search interviews..." />
       </div>
     </div>

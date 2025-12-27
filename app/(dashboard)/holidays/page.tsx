@@ -40,7 +40,7 @@ export default function HolidaysPage() {
         <div>
           <p className="font-medium text-sm">{row.name}</p>
           {row.description && (
-            <p className="text-xs text-gray-500">{row.description}</p>
+            <p className="text-xs text-slate-500">{row.description}</p>
           )}
         </div>
       ),
@@ -52,7 +52,7 @@ export default function HolidaysPage() {
         const date = new Date(row.date);
         return (
           <div className="flex items-center gap-2">
-            <Calendar className="h-3.5 w-3.5 text-gray-400" />
+            <Calendar className="h-3.5 w-3.5 text-slate-400" />
             <span className="text-sm">{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
           </div>
         );
@@ -67,7 +67,7 @@ export default function HolidaysPage() {
           className={`text-[10px] h-5 ${
             row.type === 'public' ? 'border-blue-200 text-blue-600 bg-blue-50' :
             row.type === 'company' ? 'border-purple-200 text-purple-600 bg-purple-50' : 
-            'border-gray-200 text-gray-600 bg-gray-50'
+            'border-slate-200 text-slate-600 bg-slate-50'
           }`}
         >
           {row.type}
@@ -103,11 +103,11 @@ export default function HolidaysPage() {
           const date = new Date(holiday.date);
           const daysUntil = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
           return (
-            <div key={holiday.id} className="bg-white rounded-xl border border-gray-100 p-4">
+            <div key={holiday.id} className="bg-white rounded-lg border border-slate-200 p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium text-sm text-gray-900">{holiday.name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="font-medium text-sm text-slate-900">{holiday.name}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     {date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                   </p>
                 </div>
@@ -146,9 +146,9 @@ export default function HolidaysPage() {
       </div>
 
       {/* All Holidays Table */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <h3 className="font-semibold text-sm text-gray-900">2025 Holiday Calendar</h3>
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <div className="px-4 py-3 border-b border-slate-200">
+          <h3 className="font-semibold text-sm text-slate-900">2025 Holiday Calendar</h3>
         </div>
         <DataTable
           data={holidays}

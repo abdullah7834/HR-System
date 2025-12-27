@@ -19,7 +19,7 @@ export function StatCard({
   change,
 }: StatCardProps) {
   return (
-    <div className="bg-white rounded-lg border border-slate-100 p-4">
+    <div className="bg-white rounded-lg border border-slate-200 p-4">
       <div className="flex items-center justify-between">
         <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center', iconBgColor)}>
           <Icon className={cn('h-4 w-4', iconColor)} />
