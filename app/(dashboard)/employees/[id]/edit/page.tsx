@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,16 +30,13 @@ import { toast } from "sonner";
 const employeeSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  email: z.string().email("Valid email is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().optional(),
   job_title: z.string().optional(),
   employment_type: z.string().optional(),
   date_of_joining: z.string().optional(),
   salary: z.string().optional(),
   department_id: z.string().optional(),
-  role_id: z.string().min(1, "Role is required"),
-  employee_code: z.string().optional(),
+  role_ids: z.array(z.string()).min(1, "At least one role is required"),
   gender: z.string().optional(),
   address: z.string().optional(),
 });
@@ -58,36 +55,39 @@ interface Department {
 
 const EMPLOYMENT_TYPES = ["Full Time", "Part Time", "Contract"];
 
-export default function NewEmployeePage() {
+export default function EditEmployeePage() {
   const router = useRouter();
+  const params = useParams();
+  const employeeId = params?.id as string | undefined;
+
   const [roles, setRoles] = useState<Role[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [loadingEmployee, setLoadingEmployee] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [employeeCode, setEmployeeCode] = useState("");
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
-      email: "",
-      password: "",
       phone: "",
       job_title: "",
       employment_type: "",
       date_of_joining: "",
       salary: "",
       department_id: "",
-      role_id: "",
-      employee_code: "",
+      role_ids: [],
       gender: "",
       address: "",
     },
   });
 
   useEffect(() => {
-    fetchDropdownData();
-  }, []);
+    if (!employeeId) return;
+    Promise.all([fetchDropdownData(), fetchEmployeeData()]);
+  }, [employeeId]);
 
   const fetchDropdownData = async () => {
     try {
@@ -113,11 +113,52 @@ export default function NewEmployeePage() {
     }
   };
 
+  const fetchEmployeeData = async () => {
+    if (!employeeId) return;
+    try {
+      setLoadingEmployee(true);
+      const response = await fetch(`/api/employees/${employeeId}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch employee");
+      }
+
+      const { employee, roles: employeeRoles } = data;
+
+      setEmployeeCode(employee.employee_code);
+
+      const selectedRoleIds = employeeRoles
+        .map((er: any) => er.role_id.toString())
+        .filter((id: string) => id);
+
+      form.reset({
+        first_name: employee.first_name || "",
+        last_name: employee.last_name || "",
+        phone: employee.phone || "",
+        job_title: employee.job_title || "",
+        employment_type: employee.employment_type || "",
+        date_of_joining: employee.date_of_joining || "",
+        salary: employee.salary?.toString() || "",
+        department_id: employee.department_id?.toString() || "",
+        role_ids: selectedRoleIds,
+        gender: employee.gender || "",
+        address: employee.address || "",
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error((error as Error).message);
+      router.push("/employees");
+    } finally {
+      setLoadingEmployee(false);
+    }
+  };
+
   const handleSubmit = async (data: EmployeeFormValues) => {
     setSubmitting(true);
     try {
-      const response = await fetch("/api/employees/create", {
-        method: "POST",
+      const response = await fetch(`/api/employees/${employeeId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
@@ -125,11 +166,11 @@ export default function NewEmployeePage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to create employee");
+        throw new Error(result.error || "Failed to update employee");
       }
 
-      toast.success("Employee created successfully");
-      router.push("/employees");
+      toast.success("Employee updated successfully");
+      router.push(`/employees/${employeeId}`);
     } catch (error) {
       toast.error((error as Error).message);
     } finally {
@@ -137,10 +178,19 @@ export default function NewEmployeePage() {
     }
   };
 
+  if (loadingEmployee || loadingData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600 mr-2" />
+        <span className="text-slate-600">Loading employee data...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-white sticky top-0 z-10">
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center gap-4">
           <Button
             variant="ghost"
@@ -152,27 +202,20 @@ export default function NewEmployeePage() {
           </Button>
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">
-              Add New Employee
+              Edit Employee
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Fill in the details to create a new employee
-            </p>
+            <p className="text-sm text-slate-500 mt-1">Code: {employeeCode}</p>
           </div>
         </div>
       </div>
 
       {/* Form */}
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {loadingData ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400 mr-2" />
-            <span className="text-slate-600">Loading form data...</span>
-          </div>
-        ) : (
+        <div className="bg-white rounded-lg border border-slate-200">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-6"
+              className="space-y-6 p-6"
             >
               {/* Basic Information */}
               <div>
@@ -213,140 +256,107 @@ export default function NewEmployeePage() {
                 </div>
               </div>
 
-              {/* Authentication */}
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900 mb-4">
-                  Authentication
-                </h2>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Email *
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="employee@company.com"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Password *
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="••••••••"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
               {/* Assignment */}
-              <div>
+              <div className="border-t border-slate-200 pt-6">
                 <h2 className="text-sm font-semibold text-slate-900 mb-4">
                   Assignment
                 </h2>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="role_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Role *
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {loadingData ? (
-                              <div className="flex items-center justify-center py-6">
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                Loading...
-                              </div>
-                            ) : roles.length === 0 ? (
-                              <div className="text-center py-6 text-sm text-muted-foreground">
-                                No roles found
-                              </div>
-                            ) : (
-                              roles.map((role) => (
-                                <SelectItem
-                                  key={role.id}
-                                  value={role.id.toString()}
-                                >
-                                  {role.name}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="department_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Department
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select department" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="">None</SelectItem>
-                            {departments.map((dept) => (
+                <FormField
+                  control={form.control}
+                  name="role_ids"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium mb-3 block">
+                        Roles *
+                      </FormLabel>
+                      <div className="space-y-2 border border-slate-200 rounded-md p-3 bg-slate-50 max-h-40 overflow-y-auto">
+                        {roles.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            No roles found
+                          </p>
+                        ) : (
+                          roles.map((role) => (
+                            <div
+                              key={role.id}
+                              className="flex items-center hover:bg-slate-100 p-1 rounded transition-colors"
+                            >
+                              <Checkbox
+                                id={`role-${role.id}`}
+                                checked={field.value?.includes(
+                                  role.id.toString()
+                                )}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...field.value, role.id.toString()]
+                                    : field.value.filter(
+                                        (v) => v !== role.id.toString()
+                                      );
+                                  field.onChange(newValue);
+                                }}
+                              />
+                              <label
+                                htmlFor={`role-${role.id}`}
+                                className="ml-2 text-sm cursor-pointer font-medium"
+                              >
+                                {role.name}
+                              </label>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Department */}
+              <div className="border-t border-slate-200 pt-6">
+                <h2 className="text-sm font-semibold text-slate-900 mb-4">
+                  Department
+                </h2>
+                <FormField
+                  control={form.control}
+                  name="department_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">
+                        Department
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select department" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {departments.length === 0 ? (
+                            <div className="text-center py-6 text-sm text-muted-foreground">
+                              No departments found
+                            </div>
+                          ) : (
+                            departments.map((dept) => (
                               <SelectItem
                                 key={dept.id}
                                 value={dept.id.toString()}
                               >
                                 {dept.name}
                               </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {/* Employment Details */}
-              <div>
+              <div className="border-t border-slate-200 pt-6">
                 <h2 className="text-sm font-semibold text-slate-900 mb-4">
                   Employment Details
                 </h2>
@@ -434,7 +444,7 @@ export default function NewEmployeePage() {
               </div>
 
               {/* Personal Information */}
-              <div>
+              <div className="border-t border-slate-200 pt-6">
                 <h2 className="text-sm font-semibold text-slate-900 mb-4">
                   Personal Information
                 </h2>
@@ -485,23 +495,6 @@ export default function NewEmployeePage() {
                 <div className="mt-4">
                   <FormField
                     control={form.control}
-                    name="employee_code"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Employee Code
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., EMP001" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="mt-4">
-                  <FormField
-                    control={form.control}
                     name="address"
                     render={({ field }) => (
                       <FormItem>
@@ -524,7 +517,7 @@ export default function NewEmployeePage() {
               </div>
 
               {/* Form Actions */}
-              <div className="flex gap-3 pt-8 border-t border-slate-200">
+              <div className="flex gap-3 pt-6 border-t border-slate-200">
                 <Button
                   type="button"
                   variant="outline"
@@ -536,12 +529,12 @@ export default function NewEmployeePage() {
                   {submitting && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Create Employee
+                  Update Employee
                 </Button>
               </div>
             </form>
           </Form>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -35,22 +35,43 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Protected routes - redirect to login if not authenticated
-  const protectedPaths = ['/dashboard', '/employees', '/leaves', '/attendance', '/payroll', '/projects', '/tasks', '/recruitment', '/organization', '/performance', '/training', '/chat', '/settings', '/notifications', '/holidays', '/payslips'];
-  const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
+  const protectedPaths = [
+    "/dashboard",
+    "/employees",
+    "/leaves",
+    "/attendance",
+    "/payroll",
+    "/projects",
+    "/tasks",
+    "/recruitment",
+    "/organization",
+    "/performance",
+    "/training",
+    "/chat",
+    "/settings",
+    "/notifications",
+    "/holidays",
+    "/payslips",
+  ];
+  const isProtectedPath = protectedPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  );
 
   if (isProtectedPath && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages
-  const authPaths = ['/login', '/forgot-password'];
-  const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path));
+  // Redirect authenticated users away from auth pages (but allow onboarding)
+  const authPaths = ["/login", "/forgot-password"];
+  const isAuthPath = authPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  );
 
   if (isAuthPath && user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
