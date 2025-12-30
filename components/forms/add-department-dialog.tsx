@@ -41,13 +41,13 @@ const departmentSchema = z.object({
 type DepartmentFormValues = z.infer<typeof departmentSchema>;
 
 interface Employee {
-  id: number;
+  id: string;
   first_name: string;
   last_name: string;
   job_title: string;
-  role: {
-    name: string;
-  };
+  employee_roles?: Array<{
+    role_name: string;
+  }>;
 }
 
 interface AddDepartmentDialogProps {
@@ -186,9 +186,11 @@ export function AddDepartmentDialog({
                         </div>
                       ) : (
                         employees.map((emp) => (
-                          <SelectItem key={emp.id} value={emp.id.toString()}>
-                            {emp.first_name} {emp.last_name} - {emp.job_title} (
-                            {emp.role.name})
+                          <SelectItem key={emp.id} value={emp.id}>
+                            {emp.first_name} {emp.last_name} - {emp.job_title}
+                            {emp.employee_roles && emp.employee_roles.length > 0 && (
+                              ` (${emp.employee_roles[0].role_name})`
+                            )}
                           </SelectItem>
                         ))
                       )}

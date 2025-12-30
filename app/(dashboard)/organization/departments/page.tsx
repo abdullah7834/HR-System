@@ -1,26 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Users, Building2, Loader2 } from "lucide-react";
+import { Plus, Users, Building2, Loader2, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
 import { PageHeader, DataTable, Column, StatCard } from "@/components/shared";
 import { AddDepartmentDialog } from "@/components/forms";
+import { toast } from "sonner";
 
 interface Department {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
   manager?: {
-    id: number;
+    id: string;
     first_name: string;
     last_name: string;
     job_title: string;
   };
   company?: {
+    id: string;
     name: string;
   };
   employeeCount?: number;
@@ -31,33 +33,21 @@ export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState({
     totalDepartments: 0,
-    totalEmployees: 0,
-    avgTeamSize: 0,
+    activeDepartments: 0,
+    inactiveDepartments: 0,
   });
 
   useEffect(() => {
     fetchDepartments();
-    fetchStats();
   }, []);
-
-  const fetchStats = async () => {
-    try {
-      const response = await fetch("/api/departments/stats");
-      const data = await response.json();
-
-      if (response.ok) {
-        setStats(data);
-      }
-    } catch (err) {
-      console.error("Error fetching stats:", err);
-    }
-  };
 
   const fetchDepartments = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch("/api/departments");
       const data = await response.json();
 
@@ -65,17 +55,19 @@ export default function DepartmentsPage() {
         throw new Error(data.error || "Failed to fetch departments");
       }
 
-      // Get employee counts for each department
-      const departmentsWithCount = (data.departments || []).map(
-        (dept: Department) => ({
-          ...dept,
-          employeeCount: 0, // Will be calculated from API
-        })
-      );
+      const depts = data.departments || [];
+      setDepartments(depts);
 
-      setDepartments(departmentsWithCount);
+      // Calculate stats
+      const active = depts.filter((d: Department) => d.is_active).length;
+      setStats({
+        totalDepartments: depts.length,
+        activeDepartments: active,
+        inactiveDepartments: depts.length - active,
+      });
     } catch (err) {
       setError((err as Error).message);
+      toast.error("Failed to load departments");
     } finally {
       setLoading(false);
     }
@@ -83,6 +75,53 @@ export default function DepartmentsPage() {
 
   const handleDepartmentAdded = () => {
     fetchDepartments(); // Refresh the list
+  };
+
+  const handleToggleActive = async (department: Department) => {
+    const newStatus = !department.is_active;
+    const departmentId = department.id;
+
+    // Optimistic update
+    setDepartments((prev) =>
+      prev.map((d) =>
+        d.id === departmentId ? { ...d, is_active: newStatus } : d
+      )
+    );
+
+    setTogglingIds((prev) => new Set(prev).add(departmentId));
+
+    try {
+      const response = await fetch(`/api/departments/${departmentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: newStatus }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update department");
+      }
+
+      toast.success(
+        `Department ${newStatus ? "activated" : "deactivated"} successfully`
+      );
+      fetchDepartments(); // Refresh to get updated data
+    } catch (err) {
+      // Revert optimistic update
+      setDepartments((prev) =>
+        prev.map((d) =>
+          d.id === departmentId ? { ...d, is_active: !newStatus } : d
+        )
+      );
+      toast.error((err as Error).message);
+    } finally {
+      setTogglingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(departmentId);
+        return next;
+      });
+    }
   };
 
   const columns: Column<Department>[] = [
@@ -98,7 +137,7 @@ export default function DepartmentsPage() {
             <span className="font-medium text-sm">{row.name}</span>
             {row.description && (
               <p className="text-xs text-slate-500 mt-1 truncate max-w-xs">
-                {row.description}...
+                {row.description}
               </p>
             )}
           </div>
@@ -122,28 +161,34 @@ export default function DepartmentsPage() {
       },
     },
     {
-      id: "employees",
-      header: "Employees",
+      id: "company",
+      header: "Company",
       cell: (row) => (
-        <div className="flex items-center gap-1 text-sm">
-          <Users className="h-3.5 w-3.5 text-slate-400" />
-          {row.employeeCount || 0}
-        </div>
+        <span className="text-sm text-slate-600">
+          {row.company?.name || "N/A"}
+        </span>
       ),
     },
     {
       id: "status",
       header: "Status",
       cell: (row) => (
-        <span
-          className={`text-[11px] font-medium px-2 py-0.5 rounded ${
-            row.is_active
-              ? "bg-green-50 text-green-700"
-              : "bg-slate-100 text-slate-600"
-          }`}
-        >
-          {row.is_active ? "Active" : "Inactive"}
-        </span>
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={row.is_active}
+            onCheckedChange={() => handleToggleActive(row)}
+            disabled={togglingIds.has(row.id)}
+          />
+          <span
+            className={`text-[11px] font-medium px-2 py-0.5 rounded ${
+              row.is_active
+                ? "bg-green-50 text-green-700"
+                : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            {row.is_active ? "Active" : "Inactive"}
+          </span>
+        </div>
       ),
     },
   ];
@@ -188,7 +233,7 @@ export default function DepartmentsPage() {
       />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         <StatCard
           title="Total Departments"
           value={stats.totalDepartments}
@@ -197,18 +242,18 @@ export default function DepartmentsPage() {
           iconBgColor="bg-blue-50"
         />
         <StatCard
-          title="Total Employees"
-          value={stats.totalEmployees}
-          icon={Users}
+          title="Active Departments"
+          value={stats.activeDepartments}
+          icon={Power}
           iconColor="text-green-600"
           iconBgColor="bg-green-50"
         />
         <StatCard
-          title="Avg. Team Size"
-          value={stats.avgTeamSize}
-          icon={Users}
-          iconColor="text-purple-600"
-          iconBgColor="bg-purple-50"
+          title="Inactive Departments"
+          value={stats.inactiveDepartments}
+          icon={Building2}
+          iconColor="text-slate-600"
+          iconBgColor="bg-slate-50"
         />
       </div>
 
@@ -220,7 +265,7 @@ export default function DepartmentsPage() {
           </h3>
         </div>
         <DataTable
-          data={departments.map((dept) => ({ ...dept, id: String(dept.id) }))}
+          data={departments}
           columns={columns}
           searchPlaceholder="Search departments..."
         />

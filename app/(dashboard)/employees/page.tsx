@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import { AddEmployeeDialog } from "@/components/forms/add-employee-dialog";
 
 interface Employee {
-  id: number;
+  id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -36,14 +36,15 @@ interface Employee {
   status: "Active" | "Inactive";
   date_of_joining?: string;
   employee_code?: string;
-  role?: {
-    id: number;
-    name: string;
-  };
+  employee_roles?: Array<{
+    role_name: string;
+    role_description?: string;
+    is_system_role?: boolean;
+  }>;
   department?: {
-    id: number;
+    id: string;
     name: string;
-  };
+  } | null;
   company?: {
     name: string;
   };
@@ -54,8 +55,9 @@ export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -63,9 +65,10 @@ export default function EmployeesPage() {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch("/api/employees");
       const data = await response.json();
-      console.log("data", data);
+      
       if (!response.ok) {
         throw new Error(data.error || "Failed to fetch employees");
       }
@@ -73,13 +76,14 @@ export default function EmployeesPage() {
       setEmployees(data.employees || []);
     } catch (err) {
       setError((err as Error).message);
+      toast.error((err as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleStatusToggle = async (
-    employeeId: number,
+    employeeId: string,
     currentStatus: "Active" | "Inactive"
   ) => {
     const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
@@ -124,8 +128,8 @@ export default function EmployeesPage() {
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="text-[10px] bg-blue-50 text-blue-600">
-              {row.first_name[0]}
-              {row.last_name[0]}
+              {row.first_name?.[0] || ""}
+              {row.last_name?.[0] || ""}
             </AvatarFallback>
           </Avatar>
           <div>
@@ -151,7 +155,7 @@ export default function EmployeesPage() {
       header: "Role",
       cell: (row) => (
         <span className="text-sm text-slate-600">
-          {row.role?.name || "N/A"}
+          {row.employee_roles?.[0]?.role_name || "N/A"}
         </span>
       ),
     },

@@ -1,37 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
+// GET - List all employees (no RLS, no roles - simple CRUD)
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const adminClient = await createAdminClient();
 
-    // Get current user's company
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
-    // const { data: employee } = await supabase.from("employees");
-    //   .select("company_id")
-    //   .eq("user_id", user.id)
-    //   .single();
-
-    // if (!employee) {
-    //   return NextResponse.json(
-    //     { error: "Employee record not found" },
-    //     { status: 404 }
-    //   );
-    // }
-
-    // Fetch all employees from the same company with full details
-    const { data: employees, error } = await supabase
+    const { data: employees, error } = await adminClient
       .from("employees")
       .select(
         `
@@ -45,12 +20,10 @@ export async function GET() {
         date_of_joining,
         employee_code,
         status,
-        role:role_id(id, name),
-        department:department_id(id, name),
-        company:company_id(name)
+        employee_roles(role_name, role_description, is_system_role),
+        department:department_id(id, name)
       `
       )
-      //   .eq("company_id", employee.company_id)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -58,7 +31,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ employees });
+    return NextResponse.json({ employees: employees || [] });
   } catch (err) {
     console.error("Unexpected error:", err);
     return NextResponse.json(

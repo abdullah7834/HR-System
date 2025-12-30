@@ -59,12 +59,10 @@ export async function GET(
         date_of_joining,
         salary,
         department_id,
-        role_id,
         employee_code,
         gender,
         address,
         status,
-        role:role_id(id, name),
         department:department_id(id, name)
       `
       )
@@ -84,16 +82,20 @@ export async function GET(
       );
     }
 
-    // Fetch all roles for this employee from junction table
+    // Fetch all roles for this employee from employee_roles table
     const { data: employeeRoles, error: rolesError } = await supabase
       .from("employee_roles")
       .select(
         `
-        role_id,
-        roles(id, name)
+        id,
+        role_name,
+        role_description,
+        is_system_role,
+        assigned_at
       `
       )
-      .eq("employee_id", employeeId);
+      .eq("employee_id", employeeId)
+      .order("assigned_at", { ascending: false });
 
     if (rolesError) {
       console.error("Error fetching employee roles:", rolesError);
@@ -105,7 +107,7 @@ export async function GET(
 
     return NextResponse.json({
       employee,
-      roles: employeeRoles,
+      roles: employeeRoles || [],
     });
   } catch (err) {
     console.error("Unexpected error:", err);
@@ -140,7 +142,7 @@ export async function PATCH(
       date_of_joining,
       salary,
       department_id,
-      role_id,
+      roles, // Array of roles
       gender,
       address,
     } = body;
@@ -153,8 +155,13 @@ export async function PATCH(
       );
     }
 
-    if (!role_id) {
-      return NextResponse.json({ error: "Role is required" }, { status: 400 });
+    // Support both single role_name and array of roles
+    const rolesToAssign = roles && Array.isArray(roles) && roles.length > 0 
+      ? roles 
+      : null;
+
+    if (!rolesToAssign || rolesToAssign.length === 0) {
+      return NextResponse.json({ error: "At least one role is required" }, { status: 400 });
     }
 
     const supabase = await createClient();
@@ -174,7 +181,7 @@ export async function PATCH(
 
     const { data: currentEmployee } = await supabase
       .from("employees")
-      .select("company_id")
+      .select("department_id")
       .eq("user_id", user.id)
       .single();
 
@@ -185,7 +192,19 @@ export async function PATCH(
       );
     }
 
-    // Update employee record
+    // Get accessible departments
+    const { getAccessibleDepartmentIds } = await import("@/lib/department-utils");
+    const accessibleDeptIds = await getAccessibleDepartmentIds();
+
+    // Validate department access
+    if (department_id && !accessibleDeptIds.includes(department_id)) {
+      return NextResponse.json(
+        { error: "You don't have access to this department" },
+        { status: 403 }
+      );
+    }
+
+    // Update employee record (no role_id column anymore)
     const { data: updatedEmployee, error: updateError } = await supabase
       .from("employees")
       .update({
@@ -196,14 +215,13 @@ export async function PATCH(
         employment_type,
         date_of_joining,
         salary: salary ? parseFloat(salary) : null,
-        department_id: department_id ? parseInt(department_id) : null,
-        role_id: parseInt(role_id),
+        department_id: department_id || currentEmployee.department_id,
         gender,
         address,
         updated_at: new Date().toISOString(),
       })
       .eq("id", employeeId)
-      .eq("company_id", currentEmployee.company_id)
+      .in("department_id", accessibleDeptIds.length > 0 ? accessibleDeptIds : [null])
       .select()
       .single();
 
@@ -212,7 +230,7 @@ export async function PATCH(
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    // Delete existing role and add new one
+    // Delete existing roles and add new ones
     const { error: deleteError } = await supabase
       .from("employee_roles")
       .delete()
@@ -221,16 +239,23 @@ export async function PATCH(
     if (deleteError) {
       console.error("Error deleting employee roles:", deleteError);
       return NextResponse.json(
-        { error: "Failed to update role" },
+        { error: "Failed to update roles" },
         { status: 500 }
       );
     }
 
-    // Add new employee role
-    const { error: rolesError } = await supabase.from("employee_roles").insert({
+    // Add new employee roles
+    const rolesToInsert = rolesToAssign.map((role: any) => ({
       employee_id: employeeId,
-      role_id: parseInt(role_id),
-    });
+      role_name: role.name || role.role_name,
+      role_description: role.description || role.role_description || null,
+      is_system_role: role.is_system_role || false,
+      assigned_at: new Date().toISOString(),
+    }));
+
+    const { error: rolesError } = await supabase
+      .from("employee_roles")
+      .insert(rolesToInsert);
 
     if (rolesError) {
       console.error("Employee roles creation error:", rolesError);

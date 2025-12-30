@@ -16,10 +16,13 @@ export async function POST(req: Request) {
       date_of_joining,
       salary,
       department_id,
-      role_id, // Single role ID
+      role_name, // Role name instead of role_id
+      role_description,
+      is_system_role,
       employee_code,
       gender,
       address,
+      roles, // Array of roles for multiple role assignment
     } = body;
 
     // Validation
@@ -30,8 +33,15 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!role_id) {
-      return NextResponse.json({ error: "Role is required" }, { status: 400 });
+    // Support both single role_name and array of roles
+    const rolesToAssign = roles && Array.isArray(roles) && roles.length > 0 
+      ? roles 
+      : role_name 
+        ? [{ name: role_name, description: role_description || null, is_system_role: is_system_role || false }]
+        : null;
+
+    if (!rolesToAssign || rolesToAssign.length === 0) {
+      return NextResponse.json({ error: "At least one role is required" }, { status: 400 });
     }
 
     // Create auth user first
@@ -50,7 +60,7 @@ export async function POST(req: Request) {
 
     const userId = authData.user.id;
 
-    // Get current user's company
+    // Get current user's department
     const supabase = await createClient();
     const {
       data: { user: currentUser },
@@ -62,7 +72,7 @@ export async function POST(req: Request) {
 
     const { data: currentEmployee } = await supabase
       .from("employees")
-      .select("company_id")
+      .select("department_id, company_id")
       .eq("user_id", currentUser.id)
       .single();
 
@@ -73,6 +83,16 @@ export async function POST(req: Request) {
       );
     }
 
+    // Use provided department_id or default to current user's department
+    const targetDepartmentId = department_id || currentEmployee.department_id;
+    
+    if (!targetDepartmentId) {
+      return NextResponse.json(
+        { error: "Department is required" },
+        { status: 400 }
+      );
+    }
+
     // Generate employee code: EMP + timestamp + random 3 digits
     const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
     const random = Math.floor(Math.random() * 1000)
@@ -80,11 +100,25 @@ export async function POST(req: Request) {
       .padStart(3, "0");
     const generatedEmployeeCode = `EMP${timestamp}${random}`;
 
-    // Create employee record with user_id
+    // Get company_id from department
+    const { data: department } = await supabase
+      .from("departments")
+      .select("company_id")
+      .eq("id", targetDepartmentId)
+      .single();
+
+    if (!department) {
+      return NextResponse.json(
+        { error: "Department not found" },
+        { status: 404 }
+      );
+    }
+
+    // Create employee record with user_id (no role_id column anymore)
     const { data: employee, error: empError } = await supabase
       .from("employees")
       .insert({
-        company_id: currentEmployee.company_id,
+        company_id: department.company_id,
         user_id: userId,
         first_name,
         last_name,
@@ -94,8 +128,7 @@ export async function POST(req: Request) {
         employment_type,
         date_of_joining,
         salary: salary ? parseFloat(salary) : null,
-        department_id: department_id ? parseInt(department_id) : null,
-        role_id: parseInt(role_id), // Primary role
+        department_id: targetDepartmentId,
         employee_code: employee_code || generatedEmployeeCode,
         gender,
         address,
@@ -109,16 +142,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: empError.message }, { status: 500 });
     }
 
-    // Add employee role to junction table
-    const { error: rolesError } = await supabase.from("employee_roles").insert({
+    // Add employee roles to employee_roles table
+    const rolesToInsert = rolesToAssign.map((role: any) => ({
       employee_id: employee.id,
-      role_id: parseInt(role_id),
-    });
+      role_name: role.name || role.role_name,
+      role_description: role.description || role.role_description || null,
+      is_system_role: role.is_system_role || false,
+      assigned_at: new Date().toISOString(),
+    }));
+
+    const { error: rolesError } = await supabase
+      .from("employee_roles")
+      .insert(rolesToInsert);
 
     if (rolesError) {
       console.error("Employee role creation error:", rolesError);
       return NextResponse.json(
-        { error: "Failed to assign role" },
+        { error: "Failed to assign role(s)" },
         { status: 500 }
       );
     }

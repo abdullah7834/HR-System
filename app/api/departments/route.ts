@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
+// GET - List all departments
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const adminClient = await createAdminClient();
 
-    const { data: departments, error } = await supabase
+    const { data: departments, error } = await adminClient
       .from("departments")
       .select(
         `
         *,
         manager:employees!fk_departments_manager(id, first_name, last_name, job_title),
-        company:companies(name)
+        company:companies(id, name)
       `
       )
       .order("created_at", { ascending: false });
@@ -21,7 +22,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ departments });
+    return NextResponse.json({ departments: departments || [] });
   } catch (err) {
     console.error("Unexpected error:", err);
     return NextResponse.json(
@@ -31,52 +32,47 @@ export async function GET() {
   }
 }
 
+// POST - Create a new department
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, description, manager_id } = body;
+    const { name, description, manager_id, company_id } = body;
 
-    if (!name) {
+    // Validation
+    if (!name || name.trim() === "") {
       return NextResponse.json(
         { error: "Department name is required" },
         { status: 400 }
       );
     }
 
-    const supabase = await createClient();
+    const adminClient = await createAdminClient();
 
-    // Get the company ID from the current user's employee record
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
-    const { data: employee } = await supabase
-      .from("employees")
-      .select("company_id")
-      .eq("user_id", user.id)
-      .single();
-
-    if (!employee) {
-      return NextResponse.json(
-        { error: "Employee record not found" },
-        { status: 404 }
-      );
+    // Get first company if company_id not provided
+    let targetCompanyId = company_id;
+    if (!targetCompanyId) {
+      const { data: companies } = await adminClient
+        .from("companies")
+        .select("id")
+        .limit(1)
+        .single();
+      
+      if (companies) {
+        targetCompanyId = companies.id;
+      } else {
+        return NextResponse.json(
+          { error: "No company found. Please create a company first." },
+          { status: 404 }
+        );
+      }
     }
 
     // Check if department already exists for this company
-    const { data: existingDept } = await supabase
+    const { data: existingDept } = await adminClient
       .from("departments")
       .select("id")
-      .eq("company_id", employee.company_id)
-      .eq("name", name)
+      .eq("company_id", targetCompanyId)
+      .eq("name", name.trim())
       .single();
 
     if (existingDept) {
@@ -87,19 +83,20 @@ export async function POST(req: Request) {
     }
 
     // Create department
-    const { data: department, error } = await supabase
+    const { data: department, error } = await adminClient
       .from("departments")
       .insert({
-        company_id: employee.company_id,
-        name,
-        description,
+        company_id: targetCompanyId,
+        name: name.trim(),
+        description: description?.trim() || null,
         manager_id: manager_id || null,
+        is_active: true, // Default to active
       })
       .select(
         `
         *,
         manager:employees!fk_departments_manager(id, first_name, last_name, job_title),
-        company:companies(name)
+        company:companies(id, name)
       `
       )
       .single();
@@ -109,7 +106,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ department });
+    return NextResponse.json({ department }, { status: 201 });
   } catch (err) {
     console.error("Unexpected error:", err);
     return NextResponse.json(
